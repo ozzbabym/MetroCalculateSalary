@@ -49,13 +49,6 @@
                 
                 <button id="add-interval">+ Добавить интервал работы</button>
                 
-                <h3>Простои</h3>
-                <div id="breaks-container">
-                    <!-- Простои будут добавляться здесь -->
-                </div>
-                
-                <button id="add-break">+ Добавить простой</button>
-                
                 <button id="calculate-shift">Рассчитать смену</button>
             </div>
             
@@ -87,21 +80,44 @@
                 </div>
                 
                 <h3>Детализация</h3>
-                <table id="intervals-details">
-                    <thead>
-                        <tr>
-                            <th>Тип</th>
-                            <th>Время</th>
-                            <th>Длительность</th>
-                            <th>Заработок</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Заполняется JavaScript -->
-                    </tbody>
-                </table>
+                <div class="details-grid">
+                    <div class="details-section">
+                        <h4>Интервалы работы</h4>
+                        <table id="work-intervals-details">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Начало</th>
+                                    <th>Конец</th>
+                                    <th>Длительность</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Заполняется JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="details-section">
+                        <h4>Периоды простоя</h4>
+                        <table id="break-intervals-details">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Начало</th>
+                                    <th>Конец</th>
+                                    <th>Длительность</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Заполняется JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
+        
        
         
         <div class="tab-content" id="monthly">
