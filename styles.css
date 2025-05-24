@@ -241,6 +241,172 @@ tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
+/* Календарь */
+.calendar-section {
+    background-color: white;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.calendar-controls button {
+    width: 40px;
+    padding: 5px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+#current-month-year {
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.calendar-edit-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+#edit-shift-type {
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+#save-shifts {
+    flex-shrink: 0;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(100px, 1fr));
+    gap: 5px;
+    min-width: 600px;
+}
+
+.calendar-day-header {
+    font-weight: bold;
+    padding: 8px;
+    text-align: center;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.calendar-day {
+    padding: 8px;
+    border-radius: 4px;
+    text-align: center;
+    min-height: 80px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-day:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.day-number {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.shift-info {
+    font-size: 0.8rem;
+    margin-top: auto;
+    padding: 3px;
+    border-radius: 3px;
+    background-color: rgba(255,255,255,0.7);
+}
+
+/* Типы смен */
+.shift-early {
+    background-color: #e6f7ff;
+}
+
+.shift-day {
+    background-color: #e8f5e9;
+}
+
+.shift-evening {
+    background-color: #fff7e6;
+}
+
+.shift-night {
+    background-color: #f0f0ff;
+}
+
+.shift-holiday {
+    background-color: #ffebee;
+}
+
+.calendar-day.weekend {
+    background-color: #ffecec;
+}
+
+.calendar-day.today {
+    border: 2px solid var(--secondary-color);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .calendar-grid {
+        grid-template-columns: repeat(7, minmax(60px, 1fr));
+        min-width: 420px;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 5px;
+    }
+    
+    .shift-info {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-grid {
+        grid-template-columns: repeat(7, minmax(40px, 1fr));
+        min-width: 280px;
+    }
+    
+    .calendar-day {
+        min-height: 50px;
+    }
+    
+    .day-number {
+        font-size: 0.9rem;
+    }
+    
+    .shift-info {
+        font-size: 0.6rem;
+        padding: 2px;
+    }
+    
+    .calendar-edit-controls {
+        flex-direction: column;
+    }
+    
+    #edit-shift-type, #save-shifts {
+        width: 100%;
+    }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
