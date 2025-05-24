@@ -31,7 +31,7 @@ body {
     padding: 15px;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
     color: var(--primary-color);
     margin-bottom: 15px;
 }
@@ -160,22 +160,14 @@ button:hover {
     background-color: #27ae60;
 }
 
-#add-break {
-    background-color: #f39c12;
-}
-
-#add-break:hover {
-    background-color: #e67e22;
-}
-
-.remove-interval, .remove-break {
+.remove-interval {
     background-color: var(--error-color);
     padding: 5px 10px;
     font-size: 0.8rem;
     margin-top: 0;
 }
 
-.remove-interval:hover, .remove-break:hover {
+.remove-interval:hover {
     background-color: #c0392b;
 }
 
@@ -240,19 +232,35 @@ button:hover {
     margin: 10px 0;
 }
 
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+@media (min-width: 900px) {
+    .details-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.details-section {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
-    margin: 15px 0;
+    margin: 15px 0 0;
     font-size: 0.9rem;
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    border-radius: 5px;
-    overflow: hidden;
 }
 
 th, td {
-    padding: 12px 15px;
+    padding: 10px 12px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
 }
@@ -267,19 +275,12 @@ tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-.work-interval, .break-interval {
+.work-interval {
     background-color: #f8f9fa;
     padding: 10px;
     margin-bottom: 15px;
     border-radius: 5px;
-}
-
-.work-interval {
     border-left: 3px solid var(--success-color);
-}
-
-.break-interval {
-    border-left: 3px solid #f39c12;
 }
 
 .interval-row {
