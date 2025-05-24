@@ -13,7 +13,6 @@
         <div class="tabs">
             <button class="tab-button active" data-tab="current-shift">Текущая смена</button>
             <button class="tab-button" data-tab="monthly">Месячный расчет</button>
-            <button class="tab-button" data-tab="calendar">Календарь смен</button>
         </div>
         
         <div class="tab-content active" id="current-shift">
@@ -36,36 +35,16 @@
                     </div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="start-time">Начало смены</label>
-                        <input type="time" id="start-time" value="09:00">
-                    </div>
-                    <div class="form-group">
-                        <label for="end-time">Конец смены</label>
-                        <input type="time" id="end-time" value="17:00">
-                    </div>
+                <div id="intervals-container">
+                    <!-- Интервалы будут добавляться здесь -->
                 </div>
+                
+                <button id="add-interval">+ Добавить интервал</button>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="hourly-rate">Часовая ставка (₽)</label>
                         <input type="number" id="hourly-rate" value="838.91" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="break-time">Время простоя (минуты)</label>
-                        <input type="number" id="break-time" value="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="underground-break">Отдых под землей (минуты)</label>
-                        <input type="number" id="underground-break" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="surface-break">Отдых на поверхности (минуты)</label>
-                        <input type="number" id="surface-break" value="0">
                     </div>
                 </div>
                 
@@ -78,15 +57,15 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="shift-duration">0 ч 0 мин</div>
-                        <div class="stat-label">Длительность смены</div>
+                        <div class="stat-label">Общая длительность</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="work-duration">0 ч 0 мин</div>
                         <div class="stat-label">Чистое рабочее время</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="per-minute">0.00 ₽/мин</div>
-                        <div class="stat-label">Ставка в минуту</div>
+                        <div class="stat-value" id="break-duration">0 ч 0 мин</div>
+                        <div class="stat-label">Общий простой</div>
                     </div>
                 </div>
                 
@@ -98,6 +77,21 @@
                 <div class="hourly-rate">
                     Средняя ставка: <span id="average-rate">0.00</span> ₽/час
                 </div>
+                
+                <h3>Детализация интервалов</h3>
+                <table id="intervals-details">
+                    <thead>
+                        <tr>
+                            <th>Интервал</th>
+                            <th>Работа</th>
+                            <th>Простой</th>
+                            <th>Заработок</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Заполняется JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </div>
         
@@ -244,31 +238,6 @@
                         <!-- Заполняется JavaScript -->
                     </tbody>
                 </table>
-            </div>
-        </div>
-        <div class="tab-content" id="calendar">
-            <div class="calendar-section">
-                <div class="calendar-controls">
-                    <button id="prev-month">&lt;</button>
-                    <h3 id="current-month-year">Май 2025</h3>
-                    <button id="next-month">&gt;</button>
-                </div>
-                
-                <div class="calendar-edit-controls">
-                    <select id="edit-shift-type">
-                        <option value="early">Ранняя (6:00-14:00)</option>
-                        <option value="day">Дневная (9:00-17:00)</option>
-                        <option value="evening">Вечерняя (17:00-1:00)</option>
-                        <option value="night">Ночная (22:00-6:00)</option>
-                        <option value="holiday">Праздничная</option>
-                        <option value="none">Нет смены</option>
-                    </select>
-                    <button id="save-shifts">Сохранить изменения</button>
-                </div>
-                
-                <div class="calendar-grid" id="calendar-grid">
-                    <!-- Будет заполнено JavaScript -->
-                </div>
             </div>
         </div>
     </div>
