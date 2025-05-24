@@ -27,7 +27,7 @@
                         <label for="shift-type">Тип смены</label>
                         <select id="shift-type">
                             <option value="early">Ранняя (6:00-14:00)</option>
-                            <option value="day">Дневная (9:00-17:00)</option>
+                            <option value="day" selected>Дневная (9:00-17:00)</option>
                             <option value="evening">Вечерняя (17:00-1:00)</option>
                             <option value="night">Ночная (22:00-6:00)</option>
                             <option value="holiday">Праздничная</option>
@@ -35,18 +35,26 @@
                     </div>
                 </div>
                 
-                <div id="intervals-container">
-                    <!-- Интервалы будут добавляться здесь -->
-                </div>
-                
-                <button id="add-interval">+ Добавить интервал</button>
-                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="hourly-rate">Часовая ставка (₽)</label>
                         <input type="number" id="hourly-rate" value="838.91" step="0.01">
                     </div>
                 </div>
+                
+                <h3>Интервалы работы</h3>
+                <div id="intervals-container">
+                    <!-- Интервалы будут добавляться здесь -->
+                </div>
+                
+                <button id="add-interval">+ Добавить интервал работы</button>
+                
+                <h3>Простои</h3>
+                <div id="breaks-container">
+                    <!-- Простои будут добавляться здесь -->
+                </div>
+                
+                <button id="add-break">+ Добавить простой</button>
                 
                 <button id="calculate-shift">Рассчитать смену</button>
             </div>
@@ -57,7 +65,7 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="shift-duration">0 ч 0 мин</div>
-                        <div class="stat-label">Общая длительность</div>
+                        <div class="stat-label">Длительность смены</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="work-duration">0 ч 0 мин</div>
@@ -78,13 +86,13 @@
                     Средняя ставка: <span id="average-rate">0.00</span> ₽/час
                 </div>
                 
-                <h3>Детализация интервалов</h3>
+                <h3>Детализация</h3>
                 <table id="intervals-details">
                     <thead>
                         <tr>
-                            <th>Интервал</th>
-                            <th>Работа</th>
-                            <th>Простой</th>
+                            <th>Тип</th>
+                            <th>Время</th>
+                            <th>Длительность</th>
                             <th>Заработок</th>
                         </tr>
                     </thead>
@@ -94,6 +102,7 @@
                 </table>
             </div>
         </div>
+       
         
         <div class="tab-content" id="monthly">
             <div class="form-section">
