@@ -246,17 +246,28 @@
                 </table>
             </div>
         </div>
-        
         <div class="tab-content" id="calendar">
             <div class="calendar-section">
-                <h2>Календарь смен</h2>
                 <div class="calendar-controls">
                     <button id="prev-month">&lt;</button>
                     <h3 id="current-month-year">Май 2025</h3>
                     <button id="next-month">&gt;</button>
                 </div>
+                
+                <div class="calendar-edit-controls">
+                    <select id="edit-shift-type">
+                        <option value="early">Ранняя (6:00-14:00)</option>
+                        <option value="day">Дневная (9:00-17:00)</option>
+                        <option value="evening">Вечерняя (17:00-1:00)</option>
+                        <option value="night">Ночная (22:00-6:00)</option>
+                        <option value="holiday">Праздничная</option>
+                        <option value="none">Нет смены</option>
+                    </select>
+                    <button id="save-shifts">Сохранить изменения</button>
+                </div>
+                
                 <div class="calendar-grid" id="calendar-grid">
-                    <!-- Заполняется JavaScript -->
+                    <!-- Будет заполнено JavaScript -->
                 </div>
             </div>
         </div>
