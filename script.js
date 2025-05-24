@@ -27,18 +27,23 @@ document.addEventListener('DOMContentLoaded', function() {
         'day': { name: 'Дневная', start: '9:00', end: '17:00', className: 'shift-day', bonus: 0 },
         'evening': { name: 'Вечерняя', start: '17:00', end: '1:00', className: 'shift-evening', bonus: 0.2 },
         'night': { name: 'Ночная', start: '22:00', end: '6:00', className: 'shift-night', bonus: 0.4 },
-        'holiday': { name: 'Праздничная', start: '9:00', end: '17:00', className: 'shift-holiday', bonus: 1.0 }
+        'holiday': { name: 'Праздничная', start: '9:00', end: '17:00', className: 'shift-holiday', bonus: 1.0 },
+        'none': { name: 'Нет смены', start: '', end: '', className: '', bonus: 0 }
     };
     
     // Текущий месяц и год для календаря
     let currentYear = today.getFullYear();
     let currentMonth = today.getMonth();
+    let shiftsData = {}; // Хранит данные о сменах
+    
+    // Загрузка сохраненных смен из localStorage
+    loadShiftsData();
     
     // Инициализация приложения
     initTabs();
     initShiftTypeChange();
     initCalculators();
-    renderCalendar(currentYear, currentMonth);
+    initCalendar();
     
     function initTabs() {
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -72,14 +77,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Расчет месяца
         document.getElementById('calculate-month').addEventListener('click', calculateMonthly);
         
-        // Навигация по календарю
+        // Обновление времени при изменении
+        document.getElementById('start-time').addEventListener('change', updateShiftDuration);
+        document.getElementById('end-time').addEventListener('change', updateShiftDuration);
+    }
+    
+    function initCalendar() {
+        // Навигация по месяцам
         document.getElementById('prev-month').addEventListener('click', () => {
             currentMonth--;
             if (currentMonth < 0) {
                 currentMonth = 11;
                 currentYear--;
             }
-            renderCalendar(currentYear, currentMonth);
+            renderCalendar();
         });
         
         document.getElementById('next-month').addEventListener('click', () => {
@@ -88,12 +99,126 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentMonth = 0;
                 currentYear++;
             }
-            renderCalendar(currentYear, currentMonth);
+            renderCalendar();
         });
         
-        // Обновление времени при изменении
-        document.getElementById('start-time').addEventListener('change', updateShiftDuration);
-        document.getElementById('end-time').addEventListener('change', updateShiftDuration);
+        // Сохранение изменений
+        document.getElementById('save-shifts').addEventListener('click', saveShiftsData);
+        
+        // Первоначальная отрисовка
+        renderCalendar();
+    }
+    
+    function renderCalendar() {
+        const calendarEl = document.getElementById('calendar-grid');
+        calendarEl.innerHTML = '';
+        
+        // Заголовки дней недели
+        ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'calendar-day-header';
+            dayHeader.textContent = day;
+            calendarEl.appendChild(dayHeader);
+        });
+        
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const today = new Date();
+        
+        // Заполняем календарь
+        for (let i = 0; i < 42; i++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            
+            if (i >= firstDay - 1 && i < firstDay + daysInMonth - 1) {
+                const day = i - firstDay + 2;
+                const date = new Date(currentYear, currentMonth, day);
+                const dateKey = `${currentYear}-${currentMonth}-${day}`;
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                dayEl.appendChild(dayNumber);
+                
+                // Помечаем выходные
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    dayEl.classList.add('weekend');
+                }
+                
+                // Помечаем сегодня
+                if (date.getDate() === today.getDate() && 
+                    date.getMonth() === today.getMonth() && 
+                    date.getFullYear() === today.getFullYear()) {
+                    dayEl.classList.add('today');
+                }
+                
+                // Добавляем информацию о смене, если есть
+                if (shiftsData[dateKey]) {
+                    const shiftType = shiftsData[dateKey].type;
+                    const shift = SHIFT_TYPES[shiftType];
+                    
+                    dayEl.classList.add(shift.className);
+                    
+                    const shiftInfo = document.createElement('div');
+                    shiftInfo.className = 'shift-info';
+                    shiftInfo.textContent = `${shift.name} ${shift.start}-${shift.end}`;
+                    dayEl.appendChild(shiftInfo);
+                }
+                
+                // Обработчик клика для редактирования
+                dayEl.addEventListener('click', () => {
+                    const selectedType = document.getElementById('edit-shift-type').value;
+                    const dateKey = `${currentYear}-${currentMonth}-${day}`;
+                    
+                    if (selectedType === 'none') {
+                        delete shiftsData[dateKey];
+                    } else {
+                        shiftsData[dateKey] = {
+                            type: selectedType,
+                            date: new Date(currentYear, currentMonth, day)
+                        };
+                    }
+                    
+                    renderCalendar();
+                });
+            }
+            
+            calendarEl.appendChild(dayEl);
+        }
+        
+        // Обновляем заголовок
+        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                           'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        document.getElementById('current-month-year').textContent = 
+            `${monthNames[currentMonth]} ${currentYear}`;
+            
+        // Автоматически заполняем нормы
+        if (WORKING_HOURS_NORMS[currentYear] && WORKING_HOURS_NORMS[currentYear][currentMonth]) {
+            const norms = WORKING_HOURS_NORMS[currentYear][currentMonth];
+            document.getElementById('planned-hours').value = norms.norm;
+            document.getElementById('working-days').value = norms.workingDays;
+            document.getElementById('weekend-days').value = norms.weekends;
+        }
+    }
+    
+    function saveShiftsData() {
+        localStorage.setItem('shiftsData', JSON.stringify(shiftsData));
+        alert('Изменения сохранены!');
+    }
+    
+    function loadShiftsData() {
+        const savedData = localStorage.getItem('shiftsData');
+        if (savedData) {
+            shiftsData = JSON.parse(savedData);
+            
+            // Преобразование строк дат обратно в объекты Date
+            for (const key in shiftsData) {
+                if (shiftsData[key].date) {
+                    const dateParts = key.split('-');
+                    shiftsData[key].date = new Date(dateParts[0], dateParts[1], dateParts[2]);
+                }
+            }
+        }
     }
     
     function calculateShift() {
@@ -239,109 +364,5 @@ document.addEventListener('DOMContentLoaded', function() {
             <td>${value.toFixed(2)} ₽</td>
         `;
         table.appendChild(row);
-    }
-    
-    function renderCalendar(year, month) {
-        const calendarEl = document.getElementById('calendar-grid');
-        calendarEl.innerHTML = '';
-        
-        // Заголовки дней недели
-        ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
-            const dayHeader = document.createElement('div');
-            dayHeader.className = 'calendar-day-header';
-            dayHeader.textContent = day;
-            calendarEl.appendChild(dayHeader);
-        });
-        
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const today = new Date();
-        
-        // Заполняем календарь
-        for (let i = 0; i < 42; i++) {
-            const dayEl = document.createElement('div');
-            dayEl.className = 'calendar-day';
-            
-            if (i >= firstDay - 1 && i < firstDay + daysInMonth - 1) {
-                const day = i - firstDay + 2;
-                const date = new Date(year, month, day);
-                
-                const dayNumber = document.createElement('div');
-                dayNumber.className = 'day-number';
-                dayNumber.textContent = day;
-                dayEl.appendChild(dayNumber);
-                
-                // Помечаем выходные
-                if (date.getDay() === 0 || date.getDay() === 6) {
-                    dayEl.classList.add('weekend');
-                }
-                
-                // Помечаем сегодня
-                if (date.getDate() === today.getDate() && 
-                    date.getMonth() === today.getMonth() && 
-                    date.getFullYear() === today.getFullYear()) {
-                    dayEl.classList.add('today');
-                }
-                
-                // Добавляем информацию о смене (примерные данные)
-                if (day % 5 === 0) { // Ранняя смена
-                    const shift = SHIFT_TYPES['early'];
-                    dayEl.classList.add(shift.className);
-                    
-                    const shiftInfo = document.createElement('div');
-                    shiftInfo.className = 'shift-info';
-                    shiftInfo.textContent = `${shift.name} ${shift.start}-${shift.end}`;
-                    dayEl.appendChild(shiftInfo);
-                } else if (day % 4 === 0) { // Вечерняя смена
-                    const shift = SHIFT_TYPES['evening'];
-                    dayEl.classList.add(shift.className);
-                    
-                    const shiftInfo = document.createElement('div');
-                    shiftInfo.className = 'shift-info';
-                    shiftInfo.textContent = `${shift.name} ${shift.start}-${shift.end}`;
-                    dayEl.appendChild(shiftInfo);
-                } else if (day % 3 === 0) { // Ночная смена
-                    const shift = SHIFT_TYPES['night'];
-                    dayEl.classList.add(shift.className);
-                    
-                    const shiftInfo = document.createElement('div');
-                    shiftInfo.className = 'shift-info';
-                    shiftInfo.textContent = `${shift.name} ${shift.start}-${shift.end}`;
-                    dayEl.appendChild(shiftInfo);
-                } else if (day % 7 === 0) { // Праздничная смена
-                    const shift = SHIFT_TYPES['holiday'];
-                    dayEl.classList.add(shift.className);
-                    
-                    const shiftInfo = document.createElement('div');
-                    shiftInfo.className = 'shift-info';
-                    shiftInfo.textContent = `${shift.name} ${shift.start}-${shift.end}`;
-                    dayEl.appendChild(shiftInfo);
-                } else { // Обычная дневная смена
-                    const shift = SHIFT_TYPES['day'];
-                    dayEl.classList.add(shift.className);
-                    
-                    const shiftInfo = document.createElement('div');
-                    shiftInfo.className = 'shift-info';
-                    shiftInfo.textContent = `${shift.name} ${shift.start}-${shift.end}`;
-                    dayEl.appendChild(shiftInfo);
-                }
-            }
-            
-            calendarEl.appendChild(dayEl);
-        }
-        
-        // Обновляем заголовок
-        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
-                           'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-        document.getElementById('current-month-year').textContent = 
-            `${monthNames[month]} ${year}`;
-        
-        // Автоматически заполняем нормы
-        if (WORKING_HOURS_NORMS[year] && WORKING_HOURS_NORMS[year][month]) {
-            const norms = WORKING_HOURS_NORMS[year][month];
-            document.getElementById('planned-hours').value = norms.norm;
-            document.getElementById('working-days').value = norms.workingDays;
-            document.getElementById('weekend-days').value = norms.weekends;
-        }
     }
 });
