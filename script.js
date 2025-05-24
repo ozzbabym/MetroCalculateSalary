@@ -1,4 +1,115 @@
+const WORKING_HOURS_NORMS = {
+    // Примерные нормы часов (можно дополнить)
+    2025: {
+        1: { norm: 136, workingDays: 21, weekends: 10 },
+        2: { norm: 128, workingDays: 20, weekends: 8 },
+        3: { norm: 144, workingDays: 22, weekends: 9 },
+        4: { norm: 144, workingDays: 22, weekends: 8 },
+        5: { norm: 136, workingDays: 21, weekends: 10 },
+        // ... остальные месяцы
+    }
+};
+
+const SHIFT_TYPES = {
+    'Ранняя': { start: '6:00', end: '14:00', className: 'shift-day' },
+    'Дневная': { start: '9:00', end: '17:00', className: 'shift-day' },
+    'Вечерняя': { start: '17:00', end: '1:00', className: 'shift-evening' },
+    'Ночная': { start: '22:00', end: '6:00', className: 'shift-night' },
+    'Праздничная': { start: '9:00', end: '17:00', className: 'shift-holiday' }
+};
 document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('prev-month').addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
+    renderCalendar(currentYear, currentMonth);
+});
+
+document.getElementById('next-month').addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    renderCalendar(currentYear, currentMonth);
+});
+
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+// Функция рендеринга календаря
+function renderCalendar(year, month) {
+    const calendarEl = document.getElementById('calendar');
+    calendarEl.innerHTML = '';
+    
+    // Заголовки дней недели
+    ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day-header';
+        dayHeader.textContent = day;
+        calendarEl.appendChild(dayHeader);
+    });
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    
+    // Заполняем календарь
+    for (let i = 0; i < 42; i++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
+        
+        if (i >= firstDay - 1 && i < firstDay + daysInMonth - 1) {
+            const day = i - firstDay + 2;
+            const date = new Date(year, month, day);
+            
+            dayEl.textContent = day;
+            
+            // Помечаем выходные
+            if (date.getDay() === 0 || date.getDay() === 6) {
+                dayEl.classList.add('weekend');
+            }
+            
+            // Помечаем сегодня
+            if (date.getDate() === today.getDate() && 
+                date.getMonth() === today.getMonth() && 
+                date.getFullYear() === today.getFullYear()) {
+                dayEl.classList.add('today');
+            }
+            
+            // Добавляем информацию о смене (примерная логика)
+            if (Math.random() > 0.7) { // Для демонстрации
+                const shiftType = Object.keys(SHIFT_TYPES)[Math.floor(Math.random() * 4)];
+                const shift = SHIFT_TYPES[shiftType];
+                
+                dayEl.classList.add(shift.className);
+                
+                const shiftInfo = document.createElement('div');
+                shiftInfo.className = 'shift-info';
+                shiftInfo.textContent = `${shiftType} ${shift.start}-${shift.end}`;
+                dayEl.appendChild(shiftInfo);
+            }
+        }
+        
+        calendarEl.appendChild(dayEl);
+    }
+    
+    // Обновляем заголовок
+    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    document.getElementById('current-month-year').textContent = 
+        `${monthNames[month]} ${year}`;
+    
+    // Автоматически заполняем нормы
+    if (WORKING_HOURS_NORMS[year] && WORKING_HOURS_NORMS[year][month + 1]) {
+        const norms = WORKING_HOURS_NORMS[year][month + 1];
+        document.getElementById('planned-hours').value = norms.norm;
+        document.getElementById('working-days').value = norms.workingDays;
+        document.getElementById('weekend-days').value = norms.weekends;
+    }
+}
     // Переключение между вкладками
     const tabButtons = document.querySelectorAll('.tab-button');
     tabButtons.forEach(button => {
@@ -169,6 +280,32 @@ function calculateMonthly() {
     if (bonusAmount > 0) addDetailRow(detailsTable, `Премия (${bonusPercent}%)`, bonusAmount);
     
     document.getElementById('monthly-result').classList.remove('hidden');
+      const year = parseInt(document.getElementById('year-select').value);
+    const month = parseInt(document.getElementById('month-select').value);
+    
+    let plannedHours = WORKING_HOURS_NORMS[year] && WORKING_HOURS_NORMS[year][month] 
+        ? WORKING_HOURS_NORMS[year][month].norm 
+        : 136; // Значение по умолчанию
+    
+    let workingDays = WORKING_HOURS_NORMS[year] && WORKING_HOURS_NORMS[year][month] 
+        ? WORKING_HOURS_NORMS[year][month].workingDays 
+        : 21; // Значение по умолчанию
+    
+    let weekendDays = WORKING_HOURS_NORMS[year] && WORKING_HOURS_NORMS[year][month] 
+        ? WORKING_HOURS_NORMS[year][month].weekends 
+        : 10; // Значение по умолчанию
+    
+    // Обновляем поля формы
+    document.getElementById('planned-hours').value = plannedHours;
+    document.getElementById('working-days').value = workingDays;
+    document.getElementById('weekend-days').value = weekendDays;
+    
+    // Расчет премии (фиксированная ставка 35%)
+    const bonusPercent = 35;
+    const bonusAmount = (baseEarnings + eveningBonus + nightBonus + holidayBonus + overtimeBonus) * (bonusPercent / 100);
+    
+    // ... остальной расчет ...
+}
 }
 
 function addDetailRow(table, label, value) {
