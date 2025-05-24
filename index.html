@@ -13,6 +13,7 @@
         <div class="tabs">
             <button class="tab-button active" data-tab="current-shift">Текущая смена</button>
             <button class="tab-button" data-tab="monthly">Месячный расчет</button>
+            <button class="tab-button" data-tab="calendar">Календарь смен</button>
         </div>
         
         <div class="tab-content active" id="current-shift">
@@ -26,9 +27,10 @@
                     <div class="form-group">
                         <label for="shift-type">Тип смены</label>
                         <select id="shift-type">
-                            <option value="day">Дневная</option>
-                            <option value="evening">Вечерняя</option>
-                            <option value="night">Ночная</option>
+                            <option value="early">Ранняя (6:00-14:00)</option>
+                            <option value="day">Дневная (9:00-17:00)</option>
+                            <option value="evening">Вечерняя (17:00-1:00)</option>
+                            <option value="night">Ночная (22:00-6:00)</option>
                             <option value="holiday">Праздничная</option>
                         </select>
                     </div>
@@ -106,18 +108,18 @@
                     <div class="form-group">
                         <label for="month-select">Месяц</label>
                         <select id="month-select">
-                            <option value="1">Январь</option>
-                            <option value="2">Февраль</option>
-                            <option value="3">Март</option>
-                            <option value="4">Апрель</option>
-                            <option value="5">Май</option>
-                            <option value="6">Июнь</option>
-                            <option value="7">Июль</option>
-                            <option value="8">Август</option>
-                            <option value="9">Сентябрь</option>
-                            <option value="10">Октябрь</option>
-                            <option value="11">Ноябрь</option>
-                            <option value="12">Декабрь</option>
+                            <option value="0">Январь</option>
+                            <option value="1">Февраль</option>
+                            <option value="2">Март</option>
+                            <option value="3">Апрель</option>
+                            <option value="4">Май</option>
+                            <option value="5">Июнь</option>
+                            <option value="6">Июль</option>
+                            <option value="7">Август</option>
+                            <option value="8">Сентябрь</option>
+                            <option value="9">Октябрь</option>
+                            <option value="10">Ноябрь</option>
+                            <option value="11">Декабрь</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -150,6 +152,17 @@
                 
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="early-shifts">Ранних смен</label>
+                        <input type="number" id="early-shifts" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="day-shifts">Дневных смен</label>
+                        <input type="number" id="day-shifts" value="0">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="evening-shifts">Вечерних смен</label>
                         <input type="number" id="evening-shifts" value="3">
                     </div>
@@ -175,10 +188,6 @@
                         <label for="base-hourly-rate">Базовая часовая ставка (₽)</label>
                         <input type="number" id="base-hourly-rate" step="0.01" value="838.91">
                     </div>
-                    <div class="form-group">
-                        <label for="bonus-percent">Премия (%)</label>
-                        <input type="number" id="bonus-percent" value="28">
-                    </div>
                 </div>
                 
                 <button id="calculate-month">Рассчитать за месяц</button>
@@ -197,12 +206,20 @@
                         <div class="stat-label">На линии</div>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-value" id="early-hours">0 ч</div>
+                        <div class="stat-label">Ранние часы</div>
+                    </div>
+                    <div class="stat-card">
                         <div class="stat-value" id="evening-hours">0 ч</div>
                         <div class="stat-label">Вечерние часы</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="night-hours">0 ч</div>
                         <div class="stat-label">Ночные часы</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="holiday-hours-display">0 ч</div>
+                        <div class="stat-label">Праздничные часы</div>
                     </div>
                 </div>
                 
@@ -228,18 +245,20 @@
                     </tbody>
                 </table>
             </div>
-            <!-- В разделе monthly после формы добавить: -->
-<div class="calendar-section">
-    <h3>Календарь смен на месяц</h3>
-    <div class="calendar-controls">
-        <button id="prev-month">&lt;</button>
-        <h4 id="current-month-year">Май 2025</h4>
-        <button id="next-month">&gt;</button>
-    </div>
-    <div class="calendar-grid" id="calendar">
-        <!-- Заполняется JavaScript -->
-    </div>
-</div>
+        </div>
+        
+        <div class="tab-content" id="calendar">
+            <div class="calendar-section">
+                <h2>Календарь смен</h2>
+                <div class="calendar-controls">
+                    <button id="prev-month">&lt;</button>
+                    <h3 id="current-month-year">Май 2025</h3>
+                    <button id="next-month">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Заполняется JavaScript -->
+                </div>
+            </div>
         </div>
     </div>
 
