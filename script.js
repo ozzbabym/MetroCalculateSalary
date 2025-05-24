@@ -27,23 +27,16 @@ document.addEventListener('DOMContentLoaded', function() {
         'day': { name: 'Дневная', start: '9:00', end: '17:00', className: 'shift-day', bonus: 0 },
         'evening': { name: 'Вечерняя', start: '17:00', end: '1:00', className: 'shift-evening', bonus: 0.2 },
         'night': { name: 'Ночная', start: '22:00', end: '6:00', className: 'shift-night', bonus: 0.4 },
-        'holiday': { name: 'Праздничная', start: '9:00', end: '17:00', className: 'shift-holiday', bonus: 1.0 },
-        'none': { name: 'Нет смены', start: '', end: '', className: '', bonus: 0 }
+        'holiday': { name: 'Праздничная', start: '9:00', end: '17:00', className: 'shift-holiday', bonus: 1.0 }
     };
-    
-    // Текущий месяц и год для календаря
-    let currentYear = today.getFullYear();
-    let currentMonth = today.getMonth();
-    let shiftsData = {}; // Хранит данные о сменах
-    
-    // Загрузка сохраненных смен из localStorage
-    loadShiftsData();
     
     // Инициализация приложения
     initTabs();
     initShiftTypeChange();
     initCalculators();
-    initCalendar();
+    
+    // Добавляем первый интервал по умолчанию
+    addWorkInterval();
     
     function initTabs() {
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -65,8 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const shiftTypeSelect = document.getElementById('shift-type');
         shiftTypeSelect.addEventListener('change', function() {
             const shiftType = SHIFT_TYPES[this.value];
-            document.getElementById('start-time').value = shiftType.start;
-            document.getElementById('end-time').value = shiftType.end;
+            document.querySelector('.interval-start').value = shiftType.start;
+            document.querySelector('.interval-end').value = shiftType.end;
         });
     }
     
@@ -77,122 +70,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Расчет месяца
         document.getElementById('calculate-month').addEventListener('click', calculateMonthly);
         
-        // Обновление времени при изменении
-        document.getElementById('start-time').addEventListener('change', updateShiftDuration);
-        document.getElementById('end-time').addEventListener('change', updateShiftDuration);
-    }
-    
-    function initCalendar() {
-        // Навигация по месяцам
-        document.getElementById('prev-month').addEventListener('click', () => {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar();
-        });
+        // Добавление интервала
+        document.getElementById('add-interval').addEventListener('click', addWorkInterval);
         
-        document.getElementById('next-month').addEventListener('click', () => {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar();
-        });
+        // Автоматически заполняем нормы для текущего месяца
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
         
-        // Сохранение изменений
-        document.getElementById('save-shifts').addEventListener('click', saveShiftsData);
-        
-        // Первоначальная отрисовка
-        renderCalendar();
-    }
-    
-    function renderCalendar() {
-        const calendarEl = document.getElementById('calendar-grid');
-        calendarEl.innerHTML = '';
-        
-        // Заголовки дней недели
-        ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(day => {
-            const dayHeader = document.createElement('div');
-            dayHeader.className = 'calendar-day-header';
-            dayHeader.textContent = day;
-            calendarEl.appendChild(dayHeader);
-        });
-        
-        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        const today = new Date();
-        
-        // Заполняем календарь
-        for (let i = 0; i < 42; i++) {
-            const dayEl = document.createElement('div');
-            dayEl.className = 'calendar-day';
-            
-            if (i >= firstDay - 1 && i < firstDay + daysInMonth - 1) {
-                const day = i - firstDay + 2;
-                const date = new Date(currentYear, currentMonth, day);
-                const dateKey = `${currentYear}-${currentMonth}-${day}`;
-                
-                const dayNumber = document.createElement('div');
-                dayNumber.className = 'day-number';
-                dayNumber.textContent = day;
-                dayEl.appendChild(dayNumber);
-                
-                // Помечаем выходные
-                if (date.getDay() === 0 || date.getDay() === 6) {
-                    dayEl.classList.add('weekend');
-                }
-                
-                // Помечаем сегодня
-                if (date.getDate() === today.getDate() && 
-                    date.getMonth() === today.getMonth() && 
-                    date.getFullYear() === today.getFullYear()) {
-                    dayEl.classList.add('today');
-                }
-                
-                // Добавляем информацию о смене, если есть
-                if (shiftsData[dateKey]) {
-                    const shiftType = shiftsData[dateKey].type;
-                    const shift = SHIFT_TYPES[shiftType];
-                    
-                    dayEl.classList.add(shift.className);
-                    
-                    const shiftInfo = document.createElement('div');
-                    shiftInfo.className = 'shift-info';
-                    shiftInfo.textContent = `${shift.name} ${shift.start}-${shift.end}`;
-                    dayEl.appendChild(shiftInfo);
-                }
-                
-                // Обработчик клика для редактирования
-                dayEl.addEventListener('click', () => {
-                    const selectedType = document.getElementById('edit-shift-type').value;
-                    const dateKey = `${currentYear}-${currentMonth}-${day}`;
-                    
-                    if (selectedType === 'none') {
-                        delete shiftsData[dateKey];
-                    } else {
-                        shiftsData[dateKey] = {
-                            type: selectedType,
-                            date: new Date(currentYear, currentMonth, day)
-                        };
-                    }
-                    
-                    renderCalendar();
-                });
-            }
-            
-            calendarEl.appendChild(dayEl);
-        }
-        
-        // Обновляем заголовок
-        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
-                           'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
-        document.getElementById('current-month-year').textContent = 
-            `${monthNames[currentMonth]} ${currentYear}`;
-            
-        // Автоматически заполняем нормы
         if (WORKING_HOURS_NORMS[currentYear] && WORKING_HOURS_NORMS[currentYear][currentMonth]) {
             const norms = WORKING_HOURS_NORMS[currentYear][currentMonth];
             document.getElementById('planned-hours').value = norms.norm;
@@ -201,96 +85,127 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function saveShiftsData() {
-        localStorage.setItem('shiftsData', JSON.stringify(shiftsData));
-        alert('Изменения сохранены!');
-    }
-    
-    function loadShiftsData() {
-        const savedData = localStorage.getItem('shiftsData');
-        if (savedData) {
-            shiftsData = JSON.parse(savedData);
-            
-            // Преобразование строк дат обратно в объекты Date
-            for (const key in shiftsData) {
-                if (shiftsData[key].date) {
-                    const dateParts = key.split('-');
-                    shiftsData[key].date = new Date(dateParts[0], dateParts[1], dateParts[2]);
-                }
-            }
-        }
-    }
-    
-    function calculateShift() {
-        const startTime = document.getElementById('start-time').value;
-        const endTime = document.getElementById('end-time').value;
-        const hourlyRate = parseFloat(document.getElementById('hourly-rate').value) || 0;
-        const breakTime = parseInt(document.getElementById('break-time').value) || 0;
-        const undergroundBreak = parseInt(document.getElementById('underground-break').value) || 0;
-        const surfaceBreak = parseInt(document.getElementById('surface-break').value) || 0;
+    function addWorkInterval() {
+        const container = document.getElementById('intervals-container');
+        const intervalId = Date.now();
         const shiftType = document.getElementById('shift-type').value;
         const shiftData = SHIFT_TYPES[shiftType];
         
-        // Расчет длительности смены
-        const start = new Date(`2000-01-01T${startTime}`);
-        const end = new Date(`2000-01-01T${endTime}`);
+        const intervalHtml = `
+            <div class="work-interval" data-id="${intervalId}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Начало работы</label>
+                        <input type="time" class="interval-start" value="${shiftData.start}">
+                    </div>
+                    <div class="form-group">
+                        <label>Конец работы</label>
+                        <input type="time" class="interval-end" value="${shiftData.end}">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Время простоя (минуты)</label>
+                        <input type="number" class="interval-break" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Отдых под землей (минуты)</label>
+                        <input type="number" class="interval-underground" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Отдых на поверхности (минуты)</label>
+                        <input type="number" class="interval-surface" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <button class="remove-interval">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        `;
         
-        // Корректировка для ночных смен
-        if (end < start) {
-            end.setDate(end.getDate() + 1);
-        }
+        container.insertAdjacentHTML('beforeend', intervalHtml);
         
-        const durationMs = end - start;
-        const durationHours = durationMs / (1000 * 60 * 60);
-        
-        // Расчет чистого рабочего времени
-        const totalBreakMinutes = breakTime + undergroundBreak + surfaceBreak;
-        const workHours = durationHours - (totalBreakMinutes / 60);
-        
-        // Расчет заработка
-        let earnings = workHours * hourlyRate * (1 + shiftData.bonus);
-        
-        // Доплата за отдых под землей (50% от ставки)
-        earnings += (undergroundBreak / 60) * hourlyRate * 0.5;
-        
-        // Доплата за отдых на поверхности (30% от ставки)
-        earnings += (surfaceBreak / 60) * hourlyRate * 0.3;
-        
-        // Отображение результатов
-        const durationHoursFloor = Math.floor(durationHours);
-        const durationMinutes = Math.round((durationHours - durationHoursFloor) * 60);
-        
-        const workHoursFloor = Math.floor(workHours);
-        const workMinutes = Math.round((workHours - workHoursFloor) * 60);
-        
-        document.getElementById('shift-duration').textContent = `${durationHoursFloor} ч ${durationMinutes} мин`;
-        document.getElementById('work-duration').textContent = `${workHoursFloor} ч ${workMinutes} мин`;
-        document.getElementById('per-minute').textContent = (hourlyRate / 60).toFixed(2) + ' ₽/мин';
-        document.getElementById('shift-earnings').textContent = earnings.toFixed(2) + ' ₽';
-        document.getElementById('average-rate').textContent = (earnings / workHours).toFixed(2);
-        
-        document.getElementById('shift-result').classList.remove('hidden');
+        // Добавляем обработчик удаления
+        container.querySelector(`.work-interval[data-id="${intervalId}"] .remove-interval`)
+            .addEventListener('click', function() {
+                if (document.querySelectorAll('.work-interval').length > 1) {
+                    this.closest('.work-interval').remove();
+                } else {
+                    alert('Должен быть хотя бы один интервал!');
+                }
+            });
     }
     
-    function updateShiftDuration() {
-        const startTime = document.getElementById('start-time').value;
-        const endTime = document.getElementById('end-time').value;
+    function calculateShift() {
+        const hourlyRate = parseFloat(document.getElementById('hourly-rate').value) || 0;
+        const shiftType = document.getElementById('shift-type').value;
+        const shiftData = SHIFT_TYPES[shiftType];
         
-        if (!startTime || !endTime) return;
+        let totalDuration = 0; // Общая длительность всех интервалов (в часах)
+        let totalWorkTime = 0; // Чистое рабочее время (в часах)
+        let totalBreakTime = 0; // Общее время простоя (в часах)
+        let totalEarnings = 0; // Общий заработок
         
-        const start = new Date(`2000-01-01T${startTime}`);
-        const end = new Date(`2000-01-01T${endTime}`);
+        const detailsTable = document.querySelector('#intervals-details tbody');
+        detailsTable.innerHTML = '';
         
-        // Корректировка для ночных смен
-        if (end < start) {
-            end.setDate(end.getDate() + 1);
-        }
+        // Обрабатываем каждый интервал
+        document.querySelectorAll('.work-interval').forEach((interval, index) => {
+            const startTime = interval.querySelector('.interval-start').value;
+            const endTime = interval.querySelector('.interval-end').value;
+            const breakTime = parseInt(interval.querySelector('.interval-break').value) || 0;
+            const undergroundBreak = parseInt(interval.querySelector('.interval-underground').value) || 0;
+            const surfaceBreak = parseInt(interval.querySelector('.interval-surface').value) || 0;
+            
+            // Расчет длительности интервала
+            const start = new Date(`2000-01-01T${startTime}`);
+            const end = new Date(`2000-01-01T${endTime}`);
+            
+            // Корректировка для ночных смен
+            if (end < start) {
+                end.setDate(end.getDate() + 1);
+            }
+            
+            const durationMs = end - start;
+            const durationHours = durationMs / (1000 * 60 * 60);
+            
+            // Расчет чистого рабочего времени
+            const totalBreakMinutes = breakTime + undergroundBreak + surfaceBreak;
+            const workHours = durationHours - (totalBreakMinutes / 60);
+            
+            // Расчет заработка для интервала
+            let earnings = workHours * hourlyRate * (1 + shiftData.bonus);
+            
+            // Доплаты за отдых
+            earnings += (undergroundBreak / 60) * hourlyRate * 0.5; // 50% от ставки
+            earnings += (surfaceBreak / 60) * hourlyRate * 0.3; // 30% от ставки
+            
+            // Суммируем показатели
+            totalDuration += durationHours;
+            totalWorkTime += workHours;
+            totalBreakTime += totalBreakMinutes / 60;
+            totalEarnings += earnings;
+            
+            // Добавляем строку в таблицу детализации
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>Интервал ${index + 1}</td>
+                <td>${formatHours(workHours)}</td>
+                <td>${formatHours(totalBreakMinutes / 60)}</td>
+                <td>${earnings.toFixed(2)} ₽</td>
+            `;
+            detailsTable.appendChild(row);
+        });
         
-        const durationMs = end - start;
-        const durationHours = durationMs / (1000 * 60 * 60);
+        // Отображение результатов
+        document.getElementById('shift-duration').textContent = formatHours(totalDuration);
+        document.getElementById('work-duration').textContent = formatHours(totalWorkTime);
+        document.getElementById('break-duration').textContent = formatHours(totalBreakTime);
+        document.getElementById('shift-earnings').textContent = totalEarnings.toFixed(2) + ' ₽';
+        document.getElementById('average-rate').textContent = (totalEarnings / totalWorkTime).toFixed(2);
         
-        const hours = Math.floor(durationHours);
-        const minutes = Math.round((durationHours - hours) * 60);
+        document.getElementById('shift-result').classList.remove('hidden');
     }
     
     function calculateMonthly() {
@@ -355,6 +270,13 @@ document.addEventListener('DOMContentLoaded', function() {
         addDetailRow(detailsTable, `Премия (${bonusPercent}%)`, bonusAmount);
         
         document.getElementById('monthly-result').classList.remove('hidden');
+    }
+    
+    // Вспомогательные функции
+    function formatHours(hours) {
+        const hoursFloor = Math.floor(hours);
+        const minutes = Math.round((hours - hoursFloor) * 60);
+        return `${hoursFloor} ч ${minutes} мин`;
     }
     
     function addDetailRow(table, label, value) {
