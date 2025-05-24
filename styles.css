@@ -31,7 +31,7 @@ body {
     padding: 15px;
 }
 
-h1, h2, h3, h4 {
+h1, h2, h3 {
     color: var(--primary-color);
     margin-bottom: 15px;
 }
@@ -53,7 +53,7 @@ h2 {
 
 h3 {
     font-size: 1.2rem;
-    margin-top: 20px;
+    margin: 20px 0 10px;
 }
 
 .tabs {
@@ -144,13 +144,39 @@ button {
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
-    width: 100%;
     margin: 10px 0;
     transition: background-color 0.3s;
 }
 
 button:hover {
     background-color: #2980b9;
+}
+
+#add-interval {
+    background-color: var(--success-color);
+}
+
+#add-interval:hover {
+    background-color: #27ae60;
+}
+
+#add-break {
+    background-color: #f39c12;
+}
+
+#add-break:hover {
+    background-color: #e67e22;
+}
+
+.remove-interval, .remove-break {
+    background-color: var(--error-color);
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    margin-top: 0;
+}
+
+.remove-interval:hover, .remove-break:hover {
+    background-color: #c0392b;
 }
 
 .result-section {
@@ -241,51 +267,37 @@ tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* Стили для интервалов */
-.work-interval {
+.work-interval, .break-interval {
     background-color: #f8f9fa;
     padding: 10px;
     margin-bottom: 15px;
     border-radius: 5px;
-    border-left: 3px solid var(--secondary-color);
 }
 
-.remove-interval {
-    background-color: var(--error-color);
-    margin-top: 25px;
+.work-interval {
+    border-left: 3px solid var(--success-color);
 }
 
-.remove-interval:hover {
-    background-color: #c0392b;
+.break-interval {
+    border-left: 3px solid #f39c12;
 }
 
-#intervals-container {
-    margin: 15px 0;
+.interval-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
 }
 
-#add-interval {
-    background-color: var(--success-color);
-    margin-bottom: 15px;
+.interval-group {
+    flex: 1 1 100%;
+    margin-bottom: 5px;
 }
 
-#add-interval:hover {
-    background-color: #27ae60;
-}
-
-/* Стили для таблицы детализации */
-#intervals-details {
-    margin-top: 10px;
-}
-
-#intervals-details th, 
-#intervals-details td {
-    padding: 8px 12px;
-    text-align: center;
-}
-
-#intervals-details th:first-child,
-#intervals-details td:first-child {
-    text-align: left;
+@media (min-width: 600px) {
+    .interval-group {
+        flex: 1 1 45%;
+        padding: 0 5px;
+    }
 }
 
 @keyframes fadeIn {
@@ -297,7 +309,6 @@ tr:nth-child(even) {
     animation: fadeIn 0.3s ease-out;
 }
 
-/* Мобильная адаптация */
 @media (max-width: 768px) {
     .tabs {
         flex-wrap: wrap;
@@ -326,9 +337,8 @@ tr:nth-child(even) {
         grid-template-columns: 1fr;
     }
     
-    #intervals-details th, 
-    #intervals-details td {
-        padding: 6px 8px;
+    table th, table td {
+        padding: 8px;
         font-size: 0.8rem;
     }
 }
