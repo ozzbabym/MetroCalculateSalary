@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет зарплаты машиниста метро</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-color: #f9f9f9;
+            --border-color: #ddd;
+            --text-color: #333;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f5f5;
+            padding: 0;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            text-align: center;
+            padding: 15px 0;
+            background-color: var(--primary-color);
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+        
+        .form-section {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            flex: 1 1 100%;
+            margin-bottom: 10px;
+            padding: 0 5px;
+        }
+        
+        @media (min-width: 600px) {
+            .form-group {
+                flex: 1 1 50%;
+            }
+        }
+        
+        @media (min-width: 900px) {
+            .form-group {
+                flex: 1 1 33.33%;
+            }
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        input[readonly] {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+        
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .month-tabs {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .month-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .month-tab {
+            padding: 12px 15px;
+            background-color: #eee;
+            margin-right: 2px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .month-tab:first-child {
+            border-radius: 5px 0 0 5px;
+        }
+        
+        .month-tab:last-child {
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .month-tab.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .month-content {
+            display: none;
+        }
+        
+        .month-content.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .result-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f0f7ff;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .total-row {
+            background-color: #e1f0ff;
+            font-size: 1.1rem;
+        }
+        
+        /* Мобильное меню для месяцев */
+        .mobile-month-select {
+            display: none;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .month-tabs {
+                display: none;
+            }
+            
+            .mobile-month-select {
+                display: block;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                padding: 10px 0;
+            }
+            
+            h2 {
+                font-size: 1.2rem;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-section {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Расчет зарплаты машиниста электропоезда</h1>
+        
+        <select class="mobile-month-select" id="mobile-month-select">
+            <option value="1">Январь</option>
+            <option value="2">Февраль</option>
+            <option value="3">Март</option>
+            <option value="4">Апрель</option>
+            <option value="5">Май</option>
+            <option value="6">Июнь</option>
+            <option value="7">Июль</option>
+            <option value="8">Август</option>
+            <option value="9">Сентябрь</option>
+            <option value="10">Октябрь</option>
+            <option value="11">Ноябрь</option>
+            <option value="12">Декабрь</option>
+        </select>
+        
+        <div class="month-tabs">
+            <div class="month-tab active" data-month="1">Январь</div>
+            <div class="month-tab" data-month="2">Февраль</div>
+            <div class="month-tab" data-month="3">Март</div>
+            <div class="month-tab" data-month="4">Апрель</div>
+            <div class="month-tab" data-month="5">Май</div>
+            <div class="month-tab" data-month="6">Июнь</div>
+            <div class="month-tab" data-month="7">Июль</div>
+            <div class="month-tab" data-month="8">Август</div>
+            <div class="month-tab" data-month="9">Сентябрь</div>
+            <div class="month-tab" data-month="10">Октябрь</div>
+            <div class="month-tab" data-month="11">Ноябрь</div>
+            <div class="month-tab" data-month="12">Декабрь</div>
+        </div>
+
+        <div class="form-section">
+            <h2>Общая информация</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="employee-name">ФИО сотрудника</label>
+                    <input type="text" id="employee-name" placeholder="Например: Иванов И.И.">
+                </div>
+                <div class="form-group">
+                    <label for="employee-id">Табельный номер</label>
+                    <input type="text" id="employee-id" placeholder="Например: 13001897">
+                </div>
+                <div class="form-group">
+                    <label for="position">Должность</label>
+                    <input type="text" id="position" value="Машинист электропоезда" readonly>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="department">Подразделение</label>
+                    <input type="text" id="department" value="Лок. бригады-машинисты электропоездов" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="base-salary">Оклад/тарифная ставка (руб.)</label>
+                    <input type="number" id="base-salary" value="520.17" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="work-plan">План: смен/часов</label>
+                    <input type="text" id="work-plan" placeholder="Например: 25,00/150,15">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="work-fact">Факт: смен/часов</label>
+                    <input type="text" id="work-fact" placeholder="Например: 16,00/105,15">
+                </div>
+            </div>
+        </div>
+
+        <div class="month-content active" data-month="1">
+            <div class="form-section">
+                <h2>Начисления за январь</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jan-hours-main">Часы по тарифной ставке</label>
+                        <input type="number" id="jan-hours-main" step="0.01" placeholder="Часы">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-hours-reserve">Часы по тарифной ставке (резерв)</label>
+                        <input type="number" id="jan-hours-reserve" step="0.01" placeholder="Часы">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-gap-hours">Разрывные часы</label>
+                        <input type="number" id="jan-gap-hours" step="0.01" placeholder="Часы">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jan-premium-percent">Ежемесячная премия (%)</label>
+                        <input type="number" id="jan-premium-percent" step="0.01" placeholder="Процент">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-evening-hours">Доплата за вечернее время (часы)</label>
+                        <input type="number" id="jan-evening-hours" step="0.01" placeholder="Часы">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-evening-reserve">Доплата за вечер (резерв) (часы)</label>
+                        <input type="number" id="jan-evening-reserve" step="0.01" placeholder="Часы">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jan-night-hours">Доплата за ночное время (часы)</label>
+                        <input type="number" id="jan-night-hours" step="0.01" placeholder="Часы">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-night-reserve">Доплата за ночь (резерв) (часы)</label>
+                        <input type="number" id="jan-night-reserve" step="0.01" placeholder="Часы">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-study-hours">Техническая учеба (часы)</label>
+                        <input type="number" id="jan-study-hours" step="0.01" placeholder="Часы">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jan-overtime-100">Сверхурочные 100% (часы)</label>
+                        <input type="number" id="jan-overtime-100" step="0.01" placeholder="Часы">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-overtime-50">Сверхурочные 50% (часы)</label>
+                        <input type="number" id="jan-overtime-50" step="0.01" placeholder="Часы">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-holiday-hours">Работа в праздники (часы)</label>
+                        <input type="number" id="jan-holiday-hours" step="0.01" placeholder="Часы">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jan-seniority-percent">Выслуга лет (%)</label>
+                        <input type="number" id="jan-seniority-percent" step="0.01" placeholder="Процент">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-qualification-bonus">Надбавка за класс квалификации (%)</label>
+                        <input type="number" id="jan-qualification-bonus" step="0.01" placeholder="Процент">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-personal-bonus">Персональная надбавка (%)</label>
+                        <input type="number" id="jan-personal-bonus" step="0.01" placeholder="Процент">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jan-food-payment">Оплата питания (руб.)</label>
+                        <input type="number" id="jan-food-payment" step="0.01" placeholder="Рубли">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-sick-days">Оплата по больничному листу (дни)</label>
+                        <input type="number" id="jan-sick-days" step="0.01" placeholder="Дни">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-vacation-days">Ежегодный отпуск (дни)</label>
+                        <input type="number" id="jan-vacation-days" step="0.01" placeholder="Дни">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jan-extra-vacation">Дополнительный отпуск (дни)</label>
+                        <input type="number" id="jan-extra-vacation" step="0.01" placeholder="Дни">
+                    </div>
+                    <div class="form-group">
+                        <label for="jan-one-time-payment">Разовая выплата (руб.)</label>
+                        <input type="number" id="jan-one-time-payment" step="0.01" placeholder="Рубли">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Аналогичные блоки для других месяцев (февраль-декабрь) -->
+        <!-- Для краткости в примере показан только январь -->
+
+        <div class="form-section">
+            <h2>Годовые накопления</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="total-income">Общая сумма дохода (руб.)</label>
+                    <input type="number" id="total-income" step="0.01" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="year-bonus">Сумма для годовой премии (руб.)</label>
+                    <input type="number" id="year-bonus" step="0.01" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="tax-deduction">Налоговый вычет на иждивенцев (руб.)</label>
+                    <input type="number" id="tax-deduction" step="0.01" value="0">
+                </div>
+            </div>
+        </div>
+
+        <button id="calculate-btn">Рассчитать зарплату</button>
+
+        <div class="result-section hidden" id="result-section">
+            <h2>Результаты расчета</h2>
+            
+            <div class="summary-row total-row">
+                <span>Итого начислено:</span>
+                <span id="total-accrued">0.00 руб.</span>
+            </div>
+            
+            <div class="summary-row">
+                <span>Итого удержано:</span>
+                <span id="total-deducted">0.00 руб.</span>
+            </div>
+            
+            <div class="summary-row total-row">
+                <span>К выдаче на руки:</span>
+                <span id="total-to-pay">0.00 руб.</span>
+            </div>
+            
+            <h3>Детализация начислений</h3>
+            <div style="overflow-x: auto;">
+                <table id="accruals-table">
+                    <thead>
+                        <tr>
+                            <th>Вид оплаты</th>
+                            <th>Часы/дни/%</th>
+                            <th>Начислено (руб.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Заполняется JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <h3>Детализация удержаний</h3>
+            <div style="overflow-x: auto;">
+                <table id="deductions-table">
+                    <thead>
+                        <tr>
+                            <th>Вид удержания</th>
+                            <th>Сумма (руб.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Заполняется JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Переключение между месяцами (десктоп)
+            const monthTabs = document.querySelectorAll('.month-tab');
+            monthTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Удаляем активный класс у всех вкладок и контента
+                    monthTabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Добавляем активный класс к выбранной вкладке и контенту
+                    this.classList.add('active');
+                    const month = this.getAttribute('data-month');
+                    document.querySelector(`.month-content[data-month="${month}"]`).classList.add('active');
+                    
+                    // Обновляем мобильный селект
+                    document.getElementById('mobile-month-select').value = month;
+                });
+            });
+            
+            // Переключение между месяцами (мобильные)
+            document.getElementById('mobile-month-select').addEventListener('change', function() {
+                const month = this.value;
+                
+                // Удаляем активный класс у всех вкладок и контента
+                monthTabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+                
+                // Добавляем активный класс к выбранной вкладке и контенту
+                document.querySelector(`.month-tab[data-month="${month}"]`).classList.add('active');
+                document.querySelector(`.month-content[data-month="${month}"]`).classList.add('active');
+            });
+            
+            // Кнопка расчета
+            document.getElementById('calculate-btn').addEventListener('click', calculateSalary);
+            
+            // Заполняем примерными данными для демонстрации
+            fillSampleData();
+        });
+
+        function calculateSalary() {
+            // Получаем базовые данные
+            const baseSalary = parseFloat(document.getElementById('base-salary').value) || 0;
+            
+            // Получаем активный месяц
+            const activeMonthTab = document.querySelector('.month-tab.active');
+            const activeMonth = activeMonthTab.getAttribute('data-month');
+            const monthName = activeMonthTab.textContent;
+            
+            // Получаем данные для активного месяца
+            const hoursMain = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-hours-main`).value) || 0;
+            const hoursReserve = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-hours-reserve`).value) || 0;
+            const gapHours = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-gap-hours`).value) || 0;
+            const premiumPercent = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-premium-percent`).value) || 0;
+            const eveningHours = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-evening-hours`).value) || 0;
+            const eveningReserve = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-evening-reserve`).value) || 0;
+            const nightHours = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-night-hours`).value) || 0;
+            const nightReserve = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-night-reserve`).value) || 0;
+            const studyHours = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-study-hours`).value) || 0;
+            const overtime100 = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-overtime-100`).value) || 0;
+            const overtime50 = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-overtime-50`).value) || 0;
+            const holidayHours = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-holiday-hours`).value) || 0;
+            const seniorityPercent = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-seniority-percent`).value) || 0;
+            const qualificationBonus = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-qualification-bonus`).value) || 0;
+            const personalBonus = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-personal-bonus`).value) || 0;
+            const foodPayment = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-food-payment`).value) || 0;
+            const sickDays = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-sick-days`).value) || 0;
+            const vacationDays = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-vacation-days`).value) || 0;
+            const extraVacation = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-extra-vacation`).value) || 0;
+            const oneTimePayment = parseFloat(document.getElementById(`${getMonthPrefix(activeMonth)}-one-time-payment`).value) || 0;
+            
+            // Рассчитываем начисления
+            const accruals = [];
+            
+            // 1. Повременная оплата по тарифной ставке
+            const mainSalary = hoursMain * baseSalary;
+            if (hoursMain > 0) {
+                accruals.push({
+                    name: 'Повр.опл. по тариф.став',
+                    value: hoursMain + ' ч',
+                    amount: mainSalary
+                });
+                
+                // Доплата за трудное время 12%
+                const difficultTime12 = mainSalary * 0.12;
+                if (difficultTime12 > 0) {
+                    accruals.push({
+                        name: 'В т.ч.ПовОплТрВр 12,00%',
+                        value: hoursMain + ' ч',
+                        amount: difficultTime12
+                    });
+                }
+            }
+            
+            // 2. Повременная оплата по тарифной ставке (резерв)
+            const reserveSalary = hoursReserve * baseSalary;
+            if (hoursReserve > 0) {
+                accruals.push({
+                    name: 'Повр.опл. тариф.ст.РЕЗЕРВ',
+                    value: hoursReserve + ' ч',
+                    amount: reserveSalary
+                });
+                
+                // Доплата за трудное время 8%
+                const difficultTime8 = reserveSalary * 0.08;
+                if (difficultTime8 > 0) {
+                    accruals.push({
+                        name: 'В т.ч.ПовОплТрВр 8,00%',
+                        value: hoursReserve + ' ч',
+                        amount: difficultTime8
+                    });
+                }
+            }
+            
+            // 3. Разрывные часы (примерно 1.5 от базовой ставки)
+            const gapSalary = gapHours * baseSalary * 1.5;
+            if (gapHours > 0) {
+                accruals.push({
+                    name: 'Разрывные часы',
+                    value: gapHours + ' ч',
+                    amount: gapSalary
+                });
+            }
+            
+            // 4. Ежемесячная премия
+            const premiumSalary = (mainSalary + reserveSalary + gapSalary) * (premiumPercent / 100);
+            if (premiumPercent > 0) {
+                accruals.push({
+                    name: 'ЕжемПремЛокВр',
+                    value: premiumPercent + ' %',
+                    amount: premiumSalary
+                });
+            }
+            
+            // 5. Доплата за вечернее время (20% от базовой ставки)
+            const eveningSalary = eveningHours * baseSalary * 0.2;
+            if (eveningHours > 0) {
+                accruals.push({
+                    name: 'Доплата за вечернее время',
+                    value: eveningHours + ' ч',
+                    amount: eveningSalary
+                });
+            }
+            
+            // 6. Доплата за вечер (резерв)
+            const eveningReserveSalary = eveningReserve * baseSalary * 0.2;
+            if (eveningReserve > 0) {
+                accruals.push({
+                    name: 'Доплата за вечер врезе',
+                    value: eveningReserve + ' ч',
+                    amount: eveningReserveSalary
+                });
+            }
+            
+            // 7. Доплата за ночное время (40% от базовой ставки)
+            const nightSalary = nightHours * baseSalary * 0.4;
+            if (nightHours > 0) {
+                accruals.push({
+                    name: 'Доплата за ночное время',
+                    value: nightHours + ' ч',
+                    amount: nightSalary
+                });
+            }
+            
+            // 8. Доплата за ночь (резерв)
+            const nightReserveSalary = nightReserve * baseSalary * 0.4;
+            if (nightReserve > 0) {
+                accruals.push({
+                    name: 'Доплата за ночное врезерву',
+                    value: nightReserve + ' ч',
+                    amount: nightReserveSalary
+                });
+            }
+            
+            // 9. Техническая учеба
+            const studySalary = studyHours * baseSalary;
+            if (studyHours > 0) {
+                accruals.push({
+                    name: 'Техническая учеба',
+                    value: studyHours + ' ч',
+                    amount: studySalary
+                });
+            }
+            
+            // 10. Сверхурочные 100%
+            const overtime100Salary = overtime100 * baseSalary * 2;
+            if (overtime100 > 0) {
+                accruals.push({
+                    name: 'ДоплЗаСверхурочи.100%',
+                    value: overtime100 + ' ч',
+                    amount: overtime100Salary
+                });
+            }
+            
+            // 11. Сверхурочные 50%
+            const overtime50Salary = overtime50 * baseSalary * 1.5;
+            if (overtime50 > 0) {
+                accruals.push({
+                    name: 'ДоплЗаСверхурочи.50%',
+                    value: overtime50 + ' ч',
+                    amount: overtime50Salary
+                });
+            }
+            
+            // 12. Работа в праздники (двойная ставка)
+            const holidaySalary = holidayHours * baseSalary * 2;
+            if (holidayHours > 0) {
+                accruals.push({
+                    name: 'ОплРабПраздВыхДинВнеГраф',
+                    value: holidayHours + ' ч',
+                    amount: holidaySalary
+                });
+            }
+            
+            // 13. Выслуга лет
+            const senioritySalary = (mainSalary + reserveSalary) * (seniorityPercent / 100);
+            if (seniorityPercent > 0) {
+                accruals.push({
+                    name: 'Выслуга лет',
+                    value: seniorityPercent + ' %',
+                    amount: senioritySalary
+                });
+            }
+            
+            // 14. Надбавка за класс квалификации
+            const qualificationSalary = (mainSalary + reserveSalary) * (qualificationBonus / 100);
+            if (qualificationBonus > 0) {
+                accruals.push({
+                    name: 'Надбавка за класс квалиф',
+                    value: qualificationBonus + ' %',
+                    amount: qualificationSalary
+                });
+            }
+            
+            // 15. Персональная надбавка
+            const personalBonusSalary = (mainSalary + reserveSalary) * (personalBonus / 100);
+            if (personalBonus > 0) {
+                accruals.push({
+                    name: 'Надбавка персональная',
+                    value: personalBonus + ' %',
+                    amount: personalBonusSalary
+                });
+            }
+            
+            // 16. Оплата питания
+            if (foodPayment > 0) {
+                accruals.push({
+                    name: 'Оплата Питания',
+                    value: '',
+                    amount: foodPayment
+                });
+            }
+            
+            // 17. Оплата по больничному листу (примерно 80% от средней зарплаты)
+            const sickSalary = sickDays * baseSalary * 8 * 0.8;
+            if (sickDays > 0) {
+                accruals.push({
+                    name: 'Оплата по больн. листу',
+                    value: sickDays + ' д',
+                    amount: sickSalary
+                });
+            }
+            
+            // 18. Ежегодный отпуск
+            const vacationSalary = vacationDays * baseSalary * 8;
+            if (vacationDays > 0) {
+                accruals.push({
+                    name: 'Ежегодн.отпуск',
+                    value: vacationDays + ' д',
+                    amount: vacationSalary
+                });
+            }
+            
+            // 19. Дополнительный отпуск
+            const extraVacationSalary = extraVacation * baseSalary * 8;
+            if (extraVacation > 0) {
+                accruals.push({
+                    name: 'Дополн.отпуск',
+                    value: extraVacation + ' д',
+                    amount: extraVacationSalary
+                });
+            }
+            
+            // 20. Разовая выплата
+            if (oneTimePayment > 0) {
+                accruals.push({
+                    name: 'Разовая выплата',
+                    value: '',
+                    amount: oneTimePayment
+                });
+            }
+            
+            // Рассчитываем общую сумму начислений
+            const totalAccrued = accruals.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Рассчитываем удержания
+            const deductions = [];
+            
+            // 1. НДФЛ 13%
+            const taxDeduction = parseFloat(document.getElementById('tax-deduction').value) || 0;
+            const incomeTax = Math.max(0, (totalAccrued - taxDeduction) * 0.13);
+            if (incomeTax > 0) {
+                deductions.push({
+                    name: 'НДФЛ 13%',
+                    amount: incomeTax
+                });
+            }
+            
+            // 2. Профсоюзный взнос (1% от начислений)
+            const unionDues = totalAccrued * 0.01;
+            if (unionDues > 0) {
+                deductions.push({
+                    name: 'Профсоюзный взнос',
+                    amount: unionDues
+                });
+            }
+            
+            // 3. Аванс (примерно 40% от основной зарплаты)
+            const advancePayment = (mainSalary + reserveSalary) * 0.4;
+            if (advancePayment > 0) {
+                deductions.push({
+                    name: 'Аванс перечисленный',
+                    amount: advancePayment
+                });
+            }
+            
+            // Рассчитываем общую сумму удержаний
+            const totalDeducted = deductions.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Сумма к выдаче
+            const totalToPay = totalAccrued - totalDeducted;
+            
+            // Обновляем годовую информацию
+            document.getElementById('total-income').value = totalAccrued.toFixed(2);
+            document.getElementById('year-bonus').value = (totalAccrued * 0.9).toFixed(2); // Примерно 90% от дохода
+            
+            // Отображаем результаты
+            document.getElementById('total-accrued').textContent = totalAccrued.toFixed(2) + ' руб.';
+            document.getElementById('total-deducted').textContent = totalDeducted.toFixed(2) + ' руб.';
+            document.getElementById('total-to-pay').textContent = totalToPay.toFixed(2) + ' руб.';
+            
+            // Заполняем таблицы детализации
+            const accrualsTable = document.querySelector('#accruals-table tbody');
+            accrualsTable.innerHTML = '';
+            accruals.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.value}</td>
+                    <td>${item.amount.toFixed(2)}</td>
+                `;
+                accrualsTable.appendChild(row);
+            });
+            
+            const deductionsTable = document.querySelector('#deductions-table tbody');
+            deductionsTable.innerHTML = '';
+            deductions.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.amount.toFixed(2)}</td>
+                `;
+                deductionsTable.appendChild(row);
+            });
+            
+            // Показываем секцию с результатами
+            document.getElementById('result-section').classList.remove('hidden');
+            
+            // Прокручиваем к результатам
+            document.getElementById('result-section').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        function getMonthPrefix(monthNumber) {
+            const months = [
+                'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+                'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+            ];
+            return months[parseInt(monthNumber) - 1];
+        }
+
+        function fillSampleData() {
+            // Заполняем примерными данными для января (как в расчетном листке Полещука И.В.)
+            document.getElementById('jan-hours-main').value = '77.68';
+            document.getElementById('jan-hours-reserve').value = '8.00';
+            document.getElementById('jan-gap-hours').value = '41.98';
+            document.getElementById('jan-premium-percent').value = '33.00';
+            document.getElementById('jan-evening-hours').value = '34.54';
+            document.getElementById('jan-evening-reserve').value = '2.00';
+            document.getElementById('jan-night-hours').value = '21.49';
+            document.getElementById('jan-study-hours').value = '2.00';
+            document.getElementById('jan-holiday-hours').value = '29.12';
+            document.getElementById('jan-personal-bonus').value = '10.00';
+            document.getElementById('jan-food-payment').value = '1425.00';
+            document.getElementById('jan-sick-days').value = '3.00';
+        }
+    </script>
+</body>
+</html>
+                    
+    
