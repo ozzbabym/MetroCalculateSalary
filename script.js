@@ -306,7 +306,6 @@ function calculateMonthly() {
     
     // ... остальной расчет ...
 }
-}
 
 function addDetailRow(table, label, value) {
     const row = document.createElement('tr');
